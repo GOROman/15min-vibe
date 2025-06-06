@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>今日の気分トラッカー</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* カスタムスライダーのスタイル */
+        .mood-slider {
+            -webkit-appearance: none;
+            appearance: none;
+            background: transparent;
+            cursor: pointer;
+        }
+        
+        .mood-slider::-webkit-slider-track {
+            background: rgba(255, 255, 255, 0.3);
+            height: 8px;
+            border-radius: 5px;
+        }
+        
+        .mood-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            background: white;
+            height: 24px;
+            width: 24px;
+            border-radius: 50%;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+        
+        .mood-slider::-moz-range-track {
+            background: rgba(255, 255, 255, 0.3);
+            height: 8px;
+            border-radius: 5px;
+        }
+        
+        .mood-slider::-moz-range-thumb {
+            background: white;
+            height: 24px;
+            width: 24px;
+            border-radius: 50%;
+            border: none;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center transition-all duration-1000 ease-in-out" id="body">
+    <div class="max-w-md w-full mx-4">
+        <div class="bg-white/10 backdrop-blur-lg rounded-3xl shadow-2xl p-8 md:p-12">
+            <!-- タイトル -->
+            <h1 class="text-3xl md:text-4xl font-bold text-white text-center mb-8">
+                今の気分は？
+            </h1>
+            
+            <!-- 気分の数値表示 -->
+            <div class="text-center mb-6">
+                <span id="mood-value" class="text-6xl md:text-7xl font-bold text-white">50</span>
+                <span class="text-2xl text-white/80 ml-2">/ 100</span>
+            </div>
+            
+            <!-- 気分のメッセージ -->
+            <div class="text-center mb-8">
+                <p id="mood-message" class="text-xl md:text-2xl text-white font-medium">
+                    まあまあかな
+                </p>
+            </div>
+            
+            <!-- スライダー -->
+            <div class="mb-8">
+                <input 
+                    type="range" 
+                    id="mood-slider" 
+                    min="0" 
+                    max="100" 
+                    value="50" 
+                    class="mood-slider w-full"
+                >
+            </div>
+            
+            <!-- 絵文字インジケーター -->
+            <div class="flex justify-between text-3xl mb-4">
+                <span>😭</span>
+                <span>😔</span>
+                <span>😐</span>
+                <span>😊</span>
+                <span>🤩</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const slider = document.getElementById('mood-slider');
+        const moodValue = document.getElementById('mood-value');
+        const moodMessage = document.getElementById('mood-message');
+        const body = document.getElementById('body');
+        
+        // 気分に応じたメッセージ
+        const moodMessages = {
+            0: "死にたい...",
+            10: "もう無理...",
+            20: "つらすぎる",
+            30: "しんどい",
+            40: "微妙な感じ",
+            50: "まあまあかな",
+            60: "ちょっといい感じ",
+            70: "けっこう良い！",
+            80: "すごく良い！",
+            90: "最高に近い！",
+            100: "超ハッピー！！！"
+        };
+        
+        // 気分に応じた背景色のグラデーション
+        const getBackgroundGradient = (value) => {
+            if (value <= 20) {
+                return 'bg-gradient-to-br from-gray-900 via-gray-800 to-black';
+            } else if (value <= 40) {
+                return 'bg-gradient-to-br from-blue-900 via-blue-800 to-gray-900';
+            } else if (value <= 60) {
+                return 'bg-gradient-to-br from-purple-700 via-blue-700 to-indigo-800';
+            } else if (value <= 80) {
+                return 'bg-gradient-to-br from-pink-600 via-purple-600 to-blue-600';
+            } else {
+                return 'bg-gradient-to-br from-yellow-400 via-pink-500 to-purple-600';
+            }
+        };
+        
+        // 最も近いメッセージを取得
+        const getMessage = (value) => {
+            const keys = Object.keys(moodMessages).map(Number).sort((a, b) => a - b);
+            let closestKey = keys[0];
+            
+            for (const key of keys) {
+                if (Math.abs(value - key) < Math.abs(value - closestKey)) {
+                    closestKey = key;
+                }
+            }
+            
+            return moodMessages[closestKey];
+        };
+        
+        // スライダーの値が変更されたときの処理
+        const updateMood = () => {
+            const value = parseInt(slider.value);
+            moodValue.textContent = value;
+            moodMessage.textContent = getMessage(value);
+            
+            // 既存のグラデーションクラスを削除
+            body.className = body.className.replace(/bg-gradient-to-br\s+from-\S+\s+via-\S+\s+to-\S+/g, '');
+            
+            // 新しいグラデーションクラスを追加
+            body.className += ' ' + getBackgroundGradient(value);
+        };
+        
+        // イベントリスナーを設定
+        slider.addEventListener('input', updateMood);
+        
+        // 初期表示を設定
+        updateMood();
+    </script>
+</body>
+</html>
